@@ -1,0 +1,52 @@
+version: '3.0'
+
+services:
+  kongapi:
+    image: ${KONG_IMAGE_NAME}:${VERSION_TAG}
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile.proxy
+    ports:
+      - "8000:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+    container_name: kongapi
+    networks: 
+      - kong-net
+  app:
+    image: ${APP_IMAGE_NAME}:${VERSION_TAG}
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile.app
+    ports:
+      - "8080:8080"
+    container_name: test-application
+    networks:
+      - kong-net
+  infra:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.infra
+    environment:
+      - ENV
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_ACCOUNT_ID
+      - AWS_ROLE
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_SESSION_TOKEN
+      - KONG_REPOSITORY_URL
+      - APP_REPOSITORY_URL
+    env_file: .env
+    working_dir: /opt/app
+    volumes:
+      - ./infra:/opt/app/
+      - ./scripts:/opt/app/scripts/
+    networks:
+      - kong-net
+  
+networks:
+  kong-net:
+    external: true
