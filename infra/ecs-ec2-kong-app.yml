@@ -110,6 +110,7 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Join ['', [!Ref 'AWS::StackName', -ecs-kong-app]]
+      NetworkMode: awsvpc
       ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       ContainerDefinitions:
       - Name:  ecs-kong-app
@@ -117,9 +118,6 @@ Resources:
         Essential: 'true'
         Image: !Ref 'KongImage'
         Memory: '300'
-        # Environment:
-        #   - Name: KONG_DATABASE
-        #     Value: "off"
         LogConfiguration:
           LogDriver: awslogs
           Options:
@@ -129,10 +127,8 @@ Resources:
         PortMappings:
         - 
           ContainerPort: 8000
-          HostPort: 8000
         -
           ContainerPort: 8001
-          HostPort: 8001
       - Name:  ecs-test-app
         Cpu: '10'
         Essential: 'true'
@@ -147,7 +143,6 @@ Resources:
         PortMappings:
         - 
           ContainerPort: 8080
-          HostPort: 8080
   ECSCluster:
     Type: AWS::ECS::Cluster
   AlbSecurityGroup:
@@ -205,6 +200,7 @@ Resources:
       HealthCheckPort: 8001
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
+      TargetType: ip
       Name: ECSTG
       Port: 80
       Protocol: HTTP
@@ -244,11 +240,15 @@ Resources:
     Properties:
       Cluster: !Ref 'ECSCluster'
       DesiredCount: '1'
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups: [!Ref 'EcsSecurityGroup']
+          Subnets: !Ref 'PrivateSubnetId'
       LoadBalancers:
       - ContainerName: ecs-kong-app
-        ContainerPort: '8001'
+        ContainerPort: '8000'
         TargetGroupArn: !Ref 'ECSTG'
-      Role: !Ref 'ECSServiceRole'
+      #Role: !Ref 'ECSServiceRole'
       TaskDefinition: !Ref 'taskdefinition'
   ECSServiceRole:
     Type: AWS::IAM::Role
