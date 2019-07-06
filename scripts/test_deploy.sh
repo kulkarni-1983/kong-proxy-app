@@ -5,7 +5,7 @@ MAX_RETRIES=${MAX_RETRIES:-80}
 is_health_status_up() {
   local dns="$1"
   
-  [[ "$(curl -s  -f "${dns}" | jq -r ".status")" == "UP" ]]
+  [[ "$(curl -s  -f "${dns}/health" | jq -r ".status")" != "UP" ]]
 }
 
 try_remote_status() {

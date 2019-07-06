@@ -15,16 +15,29 @@ def validate_request(func, valid_user=list(["abhi", "shar", "atharv"])):
 
 
 @app.route('/')
-def hello():
-    return "hello from flask"
+@app.route('/info')
+def info():
+    response = {
+        "message": "Congratulations! You reached application via Kong API Gateway",
+        "version": "1.0"
+    }
+    return jsonify(response)
+
+@app.route('/health')
+def health():
+    response = {
+        "status": "UP",
+        "version": "1.0"
+    }
+    return jsonify(response)
 
 
-@app.route('/api/json', methods=['POST'])
+@app.route('/api', methods=['POST'])
 @validate_request
 def handlejson():
     print(f"header=${request.headers} and data=${request.json}")
-    user = request.json["username"]
-    response = {"text": f"hello {user}"}
+    
+    response = {"received": request.json}
     return jsonify(response)
 
 if __name__ == "__main__":
