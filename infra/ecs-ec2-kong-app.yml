@@ -70,22 +70,6 @@ Resources:
     Properties:
       GroupId: !Ref 'EcsSecurityGroup'
       IpProtocol: tcp
-      FromPort: '8001'
-      ToPort: '8001'
-      CidrIp: 0.0.0.0/0
-  EcsSecurityGroupSSHinbound:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !Ref 'EcsSecurityGroup'
-      IpProtocol: tcp
-      FromPort: '22'
-      ToPort: '22'
-      CidrIp: 0.0.0.0/0
-  EcsSecurityGroupServiceInbound:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !Ref 'EcsSecurityGroup'
-      IpProtocol: tcp
       FromPort: '8000'
       ToPort: '8000'
       CidrIp: 0.0.0.0/0
@@ -129,8 +113,6 @@ Resources:
         PortMappings:
         - 
           ContainerPort: 8000
-        -
-          ContainerPort: 8001
       - Name:  ecs-test-app
         Cpu: '10'
         Essential: 'true'
@@ -200,9 +182,9 @@ Resources:
     DependsOn: ECSALB
     Properties:
       HealthCheckIntervalSeconds: 10
-      HealthCheckPath: /
+      HealthCheckPath: /health
       HealthCheckProtocol: HTTP
-      HealthCheckPort: 8001
+      HealthCheckPort: 8000
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       TargetType: ip

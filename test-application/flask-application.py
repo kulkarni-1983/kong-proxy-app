@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-def validate_request(func, valid_user=list(["abhi", "shar", "atharv"])):
+def validate_request(func):
     def warapper_validate_request(*args, **kwargs):
         message = request.json
         if message is None:
