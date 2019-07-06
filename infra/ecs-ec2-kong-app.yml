@@ -113,7 +113,7 @@ Resources:
       NetworkMode: awsvpc
       ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
       ContainerDefinitions:
-      - Name:  ecs-kong-app
+      - Name: ecs-kong-app
         Cpu: '10'
         Essential: 'true'
         Image: !Ref 'KongImage'

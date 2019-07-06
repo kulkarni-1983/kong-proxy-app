@@ -6,3 +6,5 @@ RUN pip3 install --upgrade pip && \
 
 
 WORKDIR /opt/app
+
+CMD ./scripts/infra_deploy.sh
