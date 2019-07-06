@@ -7,10 +7,8 @@ services:
       context: .
       dockerfile: ./deploy/Dockerfile.proxy
     ports:
-      - "8000:8000"
-      - "8443:8443"
-      - "8001:8001"
-      - "8444:8444"
+      - "${KONG_PROXY_LISTEN}:${KONG_PROXY_LISTEN}"
+      - "${KONG_ADMIN_LISTEN}:${KONG_ADMIN_LISTEN}"
     container_name: kongapi
     networks: 
       - kong-net
@@ -20,7 +18,7 @@ services:
       context: .
       dockerfile: ./deploy/Dockerfile.app
     ports:
-      - "8080:8080"
+      - "${APP_PORT}:${APP_PORT}"
     container_name: test-application
     networks:
       - kong-net
@@ -40,6 +38,9 @@ services:
       - KONG_REPOSITORY_URL
       - APP_REPOSITORY_URL
       - STACK_NAME
+      - APP_PORT
+      - KONG_PROXY_LISTEN
+      - KONG_ADMIN_LISTEN
     env_file: .env
     working_dir: /opt/app
     volumes:

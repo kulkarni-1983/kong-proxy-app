@@ -26,6 +26,12 @@ Parameters:
   AppImage:
     Type: String
     Description: App container image present in ecr.
+  KongProxyPort:
+    Type: Number
+    Description: Kong Proxy port number
+  AppPort:
+    Type: Number
+    Description: Application port mapping
   InstanceType:
     Description: EC2 instance type
     Type: String
@@ -70,8 +76,8 @@ Resources:
     Properties:
       GroupId: !Ref 'EcsSecurityGroup'
       IpProtocol: tcp
-      FromPort: '8000'
-      ToPort: '8000'
+      FromPort: !Ref 'KongProxyPort'
+      ToPort: !Ref 'KongProxyPort'
       CidrIp: 0.0.0.0/0
   CloudwatchLogsGroup:
     Type: AWS::Logs::LogGroup
@@ -112,7 +118,7 @@ Resources:
             awslogs-stream-prefix: ecs-kong-app
         PortMappings:
         - 
-          ContainerPort: 8000
+          ContainerPort: !Ref 'KongProxyPort'
       - Name:  ecs-test-app
         Cpu: '10'
         Essential: 'true'
@@ -126,7 +132,7 @@ Resources:
             awslogs-stream-prefix: ecs-test-app
         PortMappings:
         - 
-          ContainerPort: 8080
+          ContainerPort: !Ref 'AppPort'
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties: 
@@ -184,7 +190,7 @@ Resources:
       HealthCheckIntervalSeconds: 10
       HealthCheckPath: /health
       HealthCheckProtocol: HTTP
-      HealthCheckPort: 8000
+      HealthCheckPort: !Ref 'KongProxyPort'
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       TargetType: ip
@@ -234,7 +240,7 @@ Resources:
           Subnets: !Ref 'PrivateSubnetId'
       LoadBalancers:
       - ContainerName: ecs-kong-app
-        ContainerPort: '8000'
+        ContainerPort: !Ref 'KongProxyPort'
         TargetGroupArn: !Ref 'ECSTG'
       #Role: !Ref 'ECSServiceRole'
       TaskDefinition: !Ref 'taskdefinition'

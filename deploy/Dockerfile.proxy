@@ -1,19 +1,21 @@
 FROM kong:1.2.1-alpine
 
+ARG ARG_PROXY_LISTEN
+ARG ARG_ADMIN_LISTEN
+
 ENV KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml
 ENV KONG_DATABASE="off"
 ENV KONG_PROXY_ACCESS_LOG=/dev/stdout
 ENV KONG_ADMIN_ACCESS_LOG=/dev/stdout
 ENV KONG_PROXY_ERROR_LOG=/dev/stderr
 ENV KONG_ADMIN_ERROR_LOG=/dev/stderr
-ENV KONG_ADMIN_LISTEN="0.0.0.0:8001, 0.0.0.0:8444 ssl"
+ENV KONG_ADMIN_LISTEN="0.0.0.0:$ARG_ADMIN_LISTEN"
+ENV KONG_PROXY_LISTEN="0.0.0.0:$ARG_PROXY_LISTEN"
 
-EXPOSE 8000
-EXPOSE 8443
-EXPOSE 8001
-EXPOSE 8444
+EXPOSE $ARG_PROXY_LISTEN
+EXPOSE $ARG_ADMIN_LISTEN
 
 COPY ./kong-config/kong.yml /usr/local/kong/declarative/kong.yml
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
-   CMD curl --fail http://127.0.0.1:8001 || exit 1
+   CMD curl --fail http://127.0.0.1:$ARG_ADMIN_LISTEN || exit 1

@@ -5,6 +5,11 @@ NETWORK_NAME = kong-net
 NETWORK_SUBNET = 10.0.30.0/24
 
 export ENV=$(shell scripts/resolve_env.sh ENV)
+
+export APP_PORT=$(shell scripts/resolve_env.sh APP_PORT)
+export KONG_PROXY_LISTEN=$(shell scripts/resolve_env.sh KONG_PROXY_LISTEN)
+export KONG_ADMIN_LISTEN=$(shell scripts/resolve_env.sh KONG_ADMIN_LISTEN)
+
 export VERSION_TAG ?= $(shell git rev-parse --short HEAD)
 export KONG_IMAGE_NAME = kong-api
 export APP_IMAGE_NAME = test-app
@@ -30,6 +35,10 @@ tag: kong_container_tag app_container_tag
 publish: kong_publish app_publish
 .PHONY: publish
 
+container_test: .network kong_run app_run
+	./scripts/test_containers.sh
+.PHONY: container_test
+
 infra: .network
 	docker-compose run infra
 
@@ -40,7 +49,7 @@ infra_test: .network
 	docker-compose run --entrypoint 'sh ./scripts/test_deploy.sh' infra
 
 kong_container: .network
-	docker-compose build kongapi
+	docker-compose build --build-arg ARG_PROXY_LISTEN=$(KONG_PROXY_LISTEN) --build-arg ARG_ADMIN_LISTEN=$(KONG_ADMIN_LISTEN) kongapi
 .PHONY: kong_container
 
 kong_container_tag:
@@ -52,11 +61,11 @@ kong_publish: .network
 .PHONY: kong_publish
 
 kong_run: .network
-	docker-compose run -d -p 8000:8000 -p 8443:8443 -p 8001:8001 -p 8444:8444 kongapi
+	docker-compose run -d -p $(KONG_PROXY_LISTEN):$(KONG_PROXY_LISTEN) -p $(KONG_ADMIN_LISTEN):$(KONG_ADMIN_LISTEN)  kongapi
 .PHONY: kong_run
 
 app_container: .network
-	docker-compose build app
+	docker-compose build --build-arg ARG_APP_PORT=$(APP_PORT) app
 .PHONY: app_container
 
 app_container_tag:
@@ -68,7 +77,7 @@ app_publish: .network
 .PHONY: app_publish
 
 app_run: .network
-	docker-compose run -d -p 8080:8080 app
+	docker-compose run -d -p $(APP_PORT):$(APP_PORT) app
 .PHONY: app_run
 
 .network:

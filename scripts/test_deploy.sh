@@ -31,6 +31,6 @@ if [[ ${ALB_DNS} == "null" ]] || [[ -z "${ALB_DNS}" ]]; then
   echo "\nERROR: Could not get ALB DNS from Cloudformation stack"
   exit 1
 fi
-echo "ALD DNS: ${ALB_DNS}"
+echo "ALB DNS: ${ALB_DNS}"
 try_remote_status "${ALB_DNS}" "${MAX_RETRIES}"
 

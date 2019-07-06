@@ -9,7 +9,8 @@ aws cloudformation deploy --template-file ecs-ec2-kong-app.yml --stack-name ${ST
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --parameter-overrides \
   "Env=${ENV}" "DesiredCapacity=${DESIRED_CAPACITY}" "MaxSize=${MAX_CAPACITY}" \
   "KongImage=${KONG_REPOSITORY_URL}" "AppImage=${APP_REPOSITORY_URL}" \
-  "PublicSubnetId=${PUBLIC_SUBNET_IDS}" "PrivateSubnetId=${PRIVATE_SUBNET_IDS}" "VpcId=${VPC_ID}"
+  "PublicSubnetId=${PUBLIC_SUBNET_IDS}" "PrivateSubnetId=${PRIVATE_SUBNET_IDS}" "VpcId=${VPC_ID}" \
+  "KongProxyPort=${KONG_PROXY_LISTEN}" "AppPort=${APP_PORT}"
 
 aws cloudformation describe-stacks --stack-name ${STACK_NAME}
 
