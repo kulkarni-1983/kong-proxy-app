@@ -25,6 +25,11 @@ export STACK_NAME=${ENV}-ecs-ec2
 export KONG_REPOSITORY_URL=${APP_ECR_REPOSITORY_URL}:${KONG_IMAGE_NAME}-${VERSION_TAG}
 export APP_REPOSITORY_URL=${APP_ECR_REPOSITORY_URL}:${APP_IMAGE_NAME}-${VERSION_TAG}
 
+ENVFILE ?= env/env.example
+# creates/overwrites .env with $(ENVFILE)
+envfile:
+	cp -f $(ENVFILE) .env
+.PHONY: envfile
 
 container: kong_container app_container
 .PHONY: container
@@ -35,20 +40,20 @@ tag: kong_container_tag app_container_tag
 publish: kong_publish app_publish
 .PHONY: publish
 
-container_test: .network kong_run app_run
+container_test: .env .network kong_run app_run
 	./scripts/test_containers.sh
 .PHONY: container_test
 
-infra: .network
+infra: .env .network
 	docker-compose run infra
 
-infra_shell: .network
+infra_shell: .env .network
 	docker-compose run --entrypoint sh infra
 
-infra_test: .network
+infra_test: .env .network
 	docker-compose run --entrypoint 'sh ./scripts/test_deploy.sh' infra
 
-kong_container: .network
+kong_container: .env .network
 	docker-compose build --build-arg ARG_PROXY_LISTEN=$(KONG_PROXY_LISTEN) --build-arg ARG_ADMIN_LISTEN=$(KONG_ADMIN_LISTEN) kongapi
 .PHONY: kong_container
 
@@ -56,15 +61,15 @@ kong_container_tag:
 	docker tag ${KONG_IMAGE_NAME}:${VERSION_TAG} ${KONG_REPOSITORY_URL}
 .PHONY: kong_container_tag
 
-kong_publish: .network
+kong_publish: .env .network
 	REPOSITORY_URL=${KONG_REPOSITORY_URL} ./scripts/docker_push.sh 
 .PHONY: kong_publish
 
-kong_run: .network
+kong_run: .env .network
 	docker-compose run -d -p $(KONG_PROXY_LISTEN):$(KONG_PROXY_LISTEN) -p $(KONG_ADMIN_LISTEN):$(KONG_ADMIN_LISTEN)  kongapi
 .PHONY: kong_run
 
-app_container: .network
+app_container: .env .network
 	docker-compose build --build-arg ARG_APP_PORT=$(APP_PORT) app
 .PHONY: app_container
 
@@ -72,13 +77,21 @@ app_container_tag:
 	docker tag ${APP_IMAGE_NAME}:${VERSION_TAG} ${APP_REPOSITORY_URL}
 .PHONY: app_container_tag
 
-app_publish: .network
+app_publish: .env .network
 	REPOSITORY_URL=${APP_REPOSITORY_URL} ./scripts/docker_push.sh
 .PHONY: app_publish
 
-app_run: .network
+app_run: .env .network
 	docker-compose run -d -p $(APP_PORT):$(APP_PORT) app
 .PHONY: app_run
+
+
+#########
+# Helpers
+#########
+.env:
+	@echo "No .env file found. Please make envfile"
+	exit 1
 
 .network:
 	$(DOCKER_NETWORK) inspect  $(NETWORK_NAME) > /dev/null 2>&1; \
