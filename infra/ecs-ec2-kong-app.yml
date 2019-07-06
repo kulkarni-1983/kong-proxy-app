@@ -227,7 +227,7 @@ Resources:
     Properties:
       ServiceName: !Join ['-', [!Ref 'Env', 'ecs', 'service']]
       Cluster: !Ref 'ECSCluster'
-      DesiredCount: '1'
+      DesiredCount: !Ref 'DesiredCapacity'
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups: [!Ref 'EcsSecurityGroup']
