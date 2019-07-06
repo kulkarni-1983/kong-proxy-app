@@ -39,6 +39,7 @@ services:
       - AWS_SESSION_TOKEN
       - KONG_REPOSITORY_URL
       - APP_REPOSITORY_URL
+      - STACK_NAME
     env_file: .env
     working_dir: /opt/app
     volumes:
