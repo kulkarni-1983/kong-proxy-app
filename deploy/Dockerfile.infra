@@ -1,6 +1,6 @@
 FROM python:alpine
 
-RUN apk -uv add --no-cache groff jq less
+RUN apk -uv add --no-cache groff jq curl less
 RUN pip3 install --upgrade pip && \
     pip3 install awscli
 

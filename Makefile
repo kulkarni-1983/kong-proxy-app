@@ -36,6 +36,9 @@ infra: .network
 infra_shell: .network
 	docker-compose run --entrypoint sh infra
 
+infra_test: .network
+	docker-compose run --entrypoint 'sh ./scripts/test_deploy.sh' infra
+
 kong_container: .network
 	docker-compose build kongapi
 .PHONY: kong_container
