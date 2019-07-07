@@ -97,7 +97,7 @@ make infra_destroy
 
 ### TODO
 
-- Separate Infra code setup VPC and subnets if not present
-- Generate the .env file using a script which takes input from the user instead of manually updating the .env file
+- Separate Infra code to setup VPC and subnets if not already present
 - Docs: Architecture diagram of AWS deployment.
 - Verify `make infra_destroy` has successfully destroyed the stack.
+- Generate the .env file using a script which takes input from the user instead of manually updating the .env file
