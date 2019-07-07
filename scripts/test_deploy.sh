@@ -1,6 +1,6 @@
 #!/bin/sh -eu
 
-MAX_RETRIES=${MAX_RETRIES:-80}
+MAX_RETRIES=${MAX_RETRIES:-50}
 
 is_health_status_up() {
   local dns="$1"

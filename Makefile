@@ -14,7 +14,7 @@ export VERSION_TAG ?= $(shell git rev-parse --short HEAD)
 export KONG_IMAGE_NAME = kong-api
 export APP_IMAGE_NAME = test-app
 
-export APP_ECR_REPOSITORY_URL=$(shell scripts/resolve_env.sh APP_ECR_REPOSITORY_URL)
+export REPOSITORY_URL=$(shell scripts/resolve_env.sh REPOSITORY_URL)
 export AWS_REGION=$(shell scripts/resolve_env.sh AWS_REGION)
 export AWS_ACCESS_KEY_ID=$(shell scripts/resolve_env.sh AWS_ACCESS_KEY_ID)
 export AWS_SECRET_ACCESS_KEY=$(shell scripts/resolve_env.sh AWS_SECRET_ACCESS_KEY)
@@ -22,8 +22,8 @@ export AWS_SESSION_TOKEN=$(shell scripts/resolve_env.sh AWS_SESSION_TOKEN)
 
 export STACK_NAME=${ENV}-ecs-ec2
 
-export KONG_REPOSITORY_URL=${APP_ECR_REPOSITORY_URL}:${KONG_IMAGE_NAME}-${VERSION_TAG}
-export APP_REPOSITORY_URL=${APP_ECR_REPOSITORY_URL}:${APP_IMAGE_NAME}-${VERSION_TAG}
+export KONG_REPOSITORY_URL=${REPOSITORY_URL}:${KONG_IMAGE_NAME}-${VERSION_TAG}
+export APP_REPOSITORY_URL=${REPOSITORY_URL}:${APP_IMAGE_NAME}-${VERSION_TAG}
 
 ENVFILE ?= env/env.example
 # creates/overwrites .env with $(ENVFILE)
@@ -46,12 +46,20 @@ container_test: .env .network kong_run app_run
 
 infra: .env .network
 	docker-compose run infra
+.PHONY: infra
 
 infra_shell: .env .network
 	docker-compose run --entrypoint sh infra
+.PHONY: infra_shell
 
 infra_test: .env .network
 	docker-compose run --entrypoint 'sh ./scripts/test_deploy.sh' infra
+.PHONY: infra_test
+
+infra_destroy: .env .network
+	docker-compose run --entrypoint "aws cloudformation delete-stack --stack-name ${STACK_NAME}" infra
+.PHONY: infra_destroy
+
 
 kong_container: .env .network
 	docker-compose build --build-arg ARG_PROXY_LISTEN=$(KONG_PROXY_LISTEN) --build-arg ARG_ADMIN_LISTEN=$(KONG_ADMIN_LISTEN) kongapi
