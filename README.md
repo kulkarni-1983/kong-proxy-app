@@ -34,6 +34,8 @@ Deploys
 - Auto Scaling Group(**ASG**) takes care of scaling up the instances. 
 - Container logs updated to **CloudWatch** log group
 
+![Architecture](./docs/Arch_diagram.jpg)
+
 ## Deployment guide
 
 ### Process

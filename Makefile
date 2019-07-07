@@ -40,10 +40,6 @@ tag: kong_container_tag app_container_tag
 publish: kong_publish app_publish
 .PHONY: publish
 
-container_test: .env .network kong_run app_run
-	./scripts/test_containers.sh
-.PHONY: container_test
-
 infra: .env .network
 	docker-compose run infra
 .PHONY: infra
@@ -60,6 +56,10 @@ infra_destroy: .env .network
 	docker-compose run --entrypoint "aws cloudformation delete-stack --stack-name ${STACK_NAME}" infra
 .PHONY: infra_destroy
 
+container_test: .env .network app_run kong_run 
+	sleep 5
+	./scripts/test_containers.sh
+.PHONY: container_test
 
 kong_container: .env .network
 	docker-compose build --build-arg ARG_PROXY_LISTEN=$(KONG_PROXY_LISTEN) --build-arg ARG_ADMIN_LISTEN=$(KONG_ADMIN_LISTEN) kongapi
@@ -74,7 +74,7 @@ kong_publish: .env .network
 .PHONY: kong_publish
 
 kong_run: .env .network
-	docker-compose run -d -p $(KONG_PROXY_LISTEN):$(KONG_PROXY_LISTEN) -p $(KONG_ADMIN_LISTEN):$(KONG_ADMIN_LISTEN)  kongapi
+	docker run -d -p $(KONG_PROXY_LISTEN):$(KONG_PROXY_LISTEN) -p $(KONG_ADMIN_LISTEN):$(KONG_ADMIN_LISTEN)  ${KONG_IMAGE_NAME}:${VERSION_TAG}
 .PHONY: kong_run
 
 app_container: .env .network
@@ -90,9 +90,8 @@ app_publish: .env .network
 .PHONY: app_publish
 
 app_run: .env .network
-	docker-compose run -d -p $(APP_PORT):$(APP_PORT) app
+	docker run -d -p $(APP_PORT):$(APP_PORT) ${APP_IMAGE_NAME}:${VERSION_TAG}
 .PHONY: app_run
-
 
 #########
 # Helpers
