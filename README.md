@@ -1,4 +1,4 @@
-# AWS ECS (ec2 launch type) service hosting containers Kong API gateway and a test application
+# AWS ECS (ec2 launch type) service hosting the containers Kong API gateway and a test application
 
 Kong API gateway acts as proxy, routing the default route to test application
 
