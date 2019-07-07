@@ -4,11 +4,11 @@ Kong API gateway acts as proxy, routing the default route to test application
 
 ## KONG API Gateway
 
-- KONG Container is deployed deployed in DB-less mode.
+- KONG Container is deployed in DB-less mode.
 - The source of truth is the kong config file.
-- Routes the default path to test application
+- Routes the default path to test-application
 
-Chose DB-less mode, where each of the running container will have the same config file (Kong.yml). The main advantage are,
+Chose DB-less mode, where each of the running container will have the same config file (Kong.yml). The main advantages are,
 
 - Easy to automate end to end
 - Eliminates the need for DB overhead and configuration.
@@ -25,11 +25,11 @@ Refer to [Kong HQ](https://konghq.com/blog/kong-1-1-released/) for more informat
 
 Deploys
 - ECS Cluster using EC2 launch type
-- Task definition host kong container and test container definition
+- Task definition hosts kong container and test container definition
 - Configuration controls desired number of instances
 - Containers are published in ECR
 - Application Load Balancer(**ALB**) forwards to TargetGroup and exposes **public** DNS.
-- Target Group health checks on service port which verifies health of both kong gateway and test application.
+- Target Group does health check on service port which verifies the health of both kong gateway and test application.
 - Containers are run in **private** subnet
 - Auto Scaling Group(**ASG**) takes care of scaling up the instances. 
 - Container logs updated to **CloudWatch** log group
@@ -41,30 +41,30 @@ Deploys
  ### Quick start
 
  ```
-# setup .env file for development.
+# 1. setup .env file for development.
 make envfile
 
-# YOU ARE STRONGLY ADVISED TO UPDATE .env file to succeed in deployment
+# 2. YOU ARE STRONGLY ADVISED TO **UPDATE .env file to succeed** in deployment
 
-# package the applications(Kong api gateway and test application) into a container 
+# 3. package the applications(Kong api gateway and test application) into a container 
 make container
 
-# Run the containers locally and verify the container respond appropriately.
+# 4. Run the containers locally and verify that the container responds appropriately.
 make container_test
 
-# Tag the container with version information
+# 5. Tag the container with version information
 make tag
 
-# publish the container to the docker registry
+# 6. publish the container to the docker registry
 make publish
 
-# deploy to aws (or update existing deployment)
+# 7. deploy to aws (or update existing deployment)
 make infra
 
-# Perform a smoketest hitting healthcheck until cluster is up
+# 8. Perform a smoketest hitting healthcheck until cluster is up
 make infra_test
 
-# cleanup aws
+# 9. cleanup aws
 make infra_destroy
 ```
 
@@ -90,7 +90,7 @@ Note that
 The below generally do not need changing in regular process and mostly one time activity.
  - **ENV** - environment name used AWS resource names
  - **AWS_REGION** and **AWS_DEFAULT_REGION** - AWS Region where the stack should be deployed
- - **REPOSITORY_URL**- Deployment assumes that Repository is already create and uploads the container images to the specified location
+ - **REPOSITORY_URL**- Deployment assumes that Repository is already created and uploads the container images to the specified location
  - **VPC_NAME** - VPC and subnet across multiple AZs must be setup before starting the deployment process. 
  - **AWS_ACCESS_KEY_ID** and **AWS_SECRET_ACCESS_KEY** - Access for the AWS Cli and cloudformation. **Please note NOT to checkin the keys to repository**
  - **DESIRED_CAPACITY** and **MAX_CAPACITY** - Desired and max capacity of number Instances and Tasks
@@ -100,6 +100,5 @@ The below generally do not need changing in regular process and mostly one time 
 ### TODO
 
 - Separate Infra code to setup VPC and subnets if not already present
-- Docs: Architecture diagram of AWS deployment.
 - Verify `make infra_destroy` has successfully destroyed the stack.
 - Generate the .env file using a script which takes input from the user instead of manually updating the .env file
