@@ -101,4 +101,5 @@ The below generally do not need changing in regular process and mostly one time 
 
 - Separate Infra code to setup VPC and subnets if not already present
 - Verify `make infra_destroy` has successfully destroyed the stack.
+- Route53 hosted zone and record route setup
 - Generate the .env file using a script which takes input from the user instead of manually updating the .env file
