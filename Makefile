@@ -49,7 +49,7 @@ infra_shell: .env .network
 .PHONY: infra_shell
 
 infra_test: .env .network
-	docker-compose run --entrypoint 'sh ./scripts/test_deploy.sh' infra
+	docker-compose run  --entrypoint 'ansible-playbook playbook/infra-validate.yml' ansible_infra
 .PHONY: infra_test
 
 infra_destroy: .env .network
