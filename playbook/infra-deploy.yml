@@ -1,0 +1,67 @@
+---
+- name: Get configured VPC and subnet details
+  hosts: localhost
+  gather_facts: yes
+  tasks:
+    - ec2_vpc_net_facts:
+        filters:
+          "tag:Name": "{{lookup('env','VPC_NAME')}}"
+      register: vpcs
+    - name: Display vpc
+      debug: 
+        msg:
+          - "{{ vpcs.vpcs[0].vpc_id }}"
+    - ec2_vpc_subnet_facts:
+        filters:
+          vpc-id: "{{vpcs.vpcs[0].vpc_id}}"
+          "tag:Tier": "private"
+      register: private_subnet_ids
+    - name: Display priate subnet ids
+      debug: 
+        msg:
+          - "{{ private_subnet_ids.subnets|map(attribute='id')|list|join(',') }}"
+    - ec2_vpc_subnet_facts:
+        filters:
+          vpc-id: "{{vpcs.vpcs[0].vpc_id}}"
+          "tag:Tier": "public"
+      register: "public_subnet_ids"
+    - name: Display public subnet ids
+      debug: 
+        msg:
+          - "{{ public_subnet_ids.subnets|map(attribute='id')|list|join(',') }}"
+
+- name: Deploy ECS-EC2 using cloudformation
+  hosts: localhost
+  gather_facts: no
+  vars:
+    vpc_id: "{{vpcs.vpcs[0].vpc_id}}"
+    private_ids : "{{ private_subnet_ids.subnets|map(attribute='id')|list|join(',') }}"
+    public_ids: "{{ public_subnet_ids.subnets|map(attribute='id')|list|join(',') }}"
+    state: "{{lookup('env','DEPLOY_STATE')}}"
+  tasks:
+    - cloudformation:
+        stack_name: "{{lookup('env','STACK_NAME')}}"
+        template: "/app/infra/ecs-ec2-kong-app.yml"
+        template_parameters:
+          Env: "{{ lookup('env','VPC_NAME') }}"
+          VpcId: "{{ vpc_id }}"
+          PrivateSubnetId: "{{ private_ids }}"
+          PublicSubnetId: "{{ public_ids }}"
+          DesiredCapacity: "{{ lookup('env','DESIRED_CAPACITY') }}"
+          MaxSize: "{{ lookup('env','MAX_CAPACITY') }}"
+          KongImage: "{{ lookup('env','KONG_REPOSITORY_URL') }}"
+          AppImage: "{{ lookup('env','APP_REPOSITORY_URL') }}"
+          KongProxyPort: "{{ lookup('env','KONG_PROXY_LISTEN') }}"
+          AppPort: "{{ lookup('env','APP_PORT') }}"
+        state: "{{state}}"
+      register: cloud_stack
+    
+- name: Display the VPCs got from previous step
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Display stack
+      # debug: msg='{{ private_subnet_ids.subnets|map(attribute='id')|list }}'
+      debug: 
+        msg:
+          - "{{ cloud_stack }}"

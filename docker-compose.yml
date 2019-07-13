@@ -48,6 +48,35 @@ services:
       - ./scripts:/opt/app/scripts/
     networks:
       - kong-net
+  ansible_infra:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.ansible
+    image: ansible/ansible-runner
+    environment:
+      - ENV
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_SESSION_TOKEN
+      - KONG_REPOSITORY_URL
+      - APP_REPOSITORY_URL
+      - STACK_NAME
+      - APP_PORT
+      - KONG_PROXY_LISTEN
+      - KONG_ADMIN_LISTEN
+      - VPC_NAME
+      - DEPLOY_STATE
+    env_file: .env
+    working_dir: /app
+    volumes:
+      - ./playbook:/app/playbook
+      - ./scripts:/app/scripts
+      - ./infra:/app/infra
+    networks:
+      - kong-net
+
   
 networks:
   kong-net:

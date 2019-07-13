@@ -41,11 +41,11 @@ publish: kong_publish app_publish
 .PHONY: publish
 
 infra: .env .network
-	docker-compose run infra
+	DEPLOY_STATE=present docker-compose run ansible_infra
 .PHONY: infra
 
 infra_shell: .env .network
-	docker-compose run --entrypoint sh infra
+	docker-compose run --entrypoint bash ansible_infra
 .PHONY: infra_shell
 
 infra_test: .env .network
@@ -53,7 +53,7 @@ infra_test: .env .network
 .PHONY: infra_test
 
 infra_destroy: .env .network
-	docker-compose run --entrypoint "aws cloudformation delete-stack --stack-name ${STACK_NAME}" infra
+	DEPLOY_STATE=absent docker-compose run ansible_infra
 .PHONY: infra_destroy
 
 container_test: .env .network app_run kong_run 

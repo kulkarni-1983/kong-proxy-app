@@ -1,0 +1,11 @@
+FROM ansible/ansible-runner 
+
+RUN yum install python34 -y
+RUN pip install --upgrade pip && \
+    pip install boto3
+
+WORKDIR /app
+
+CMD ansible-playbook playbook/infra-deploy.yml
+
+
